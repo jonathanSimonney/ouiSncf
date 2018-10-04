@@ -19,6 +19,10 @@ class PlaceRepository extends ServiceEntityRepository
         parent::__construct($registry, Place::class);
     }
 
+    public function findFromToBeginningAt($fromPlace, $toPlace, $departureTime){
+
+    }
+
 //    /**
 //     * @return Place[] Returns an array of Place objects
 //     */

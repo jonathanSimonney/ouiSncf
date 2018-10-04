@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Destination;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -23,7 +23,7 @@ class SearchFormType extends AbstractType
                 'class' => Destination::class,
                 'choice_label' => 'name'
             ))
-            ->add('from_time', DateType::class)
+            ->add('from_time', DateTimeType::class, array('data' => new \DateTime()))//add time to be current time
             ->add('search', SubmitType::class)
         ;
     }

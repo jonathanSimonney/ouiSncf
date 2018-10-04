@@ -14,7 +14,7 @@ class Destination
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string")
      */
     private $id;
 
@@ -24,12 +24,12 @@ class Destination
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Horaire", mappedBy="from_id", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Horaire", mappedBy="from", orphanRemoval=true)
      */
     private $horaires_departure;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Horaire", mappedBy="to_id", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Horaire", mappedBy="to", orphanRemoval=true)
      */
     private $horaires_arrival;
 
@@ -79,8 +79,8 @@ class Destination
         if ($this->horaires->contains($horaire)) {
             $this->horaires->removeElement($horaire);
             // set the owning side to null (unless already changed)
-            if ($horaire->getFromId() === $this) {
-                $horaire->setFromId(null);
+            if ($horaire->getFrom() === $this) {
+                $horaire->setFrom(null);
             }
         }
 
@@ -99,7 +99,7 @@ class Destination
     {
         if (!$this->horaires_arrival->contains($horairesArrival)) {
             $this->horaires_arrival[] = $horairesArrival;
-            $horairesArrival->setToId($this);
+            $horairesArrival->setTo($this);
         }
 
         return $this;
@@ -110,8 +110,8 @@ class Destination
         if ($this->horaires_arrival->contains($horairesArrival)) {
             $this->horaires_arrival->removeElement($horairesArrival);
             // set the owning side to null (unless already changed)
-            if ($horairesArrival->getToId() === $this) {
-                $horairesArrival->setToId(null);
+            if ($horairesArrival->getTo() === $this) {
+                $horairesArrival->setTo(null);
             }
         }
 

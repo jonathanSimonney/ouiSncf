@@ -22,21 +22,26 @@ class Horaire
      * @ORM\ManyToOne(targetEntity="App\Entity\Destination", inversedBy="horaires_departure")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $from_id;
+    private $from;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Destination", inversedBy="horaires_arrival")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $to_id;
+    private $to;
 
     /**
      * @ORM\Column(type="datetime")
      */
+    private $day;
+
+    /**
+     * @ORM\Column(type="time")
+     */
     private $depart_at;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="time")
      */
     private $arrive_at;
 
@@ -55,26 +60,38 @@ class Horaire
         return $this->id;
     }
 
-    public function getFromId(): ?Destination
+    public function getFrom(): ?Destination
     {
-        return $this->from_id;
+        return $this->from;
     }
 
-    public function setFromId(?Destination $from_id): self
+    public function setFrom(?Destination $from): self
     {
-        $this->from_id = $from_id;
+        $this->from = $from;
 
         return $this;
     }
 
-    public function getToId(): ?Destination
+    public function getTo(): ?Destination
     {
-        return $this->to_id;
+        return $this->to;
     }
 
-    public function setToId(?Destination $to_id): self
+    public function setTo(?Destination $to): self
     {
-        $this->to_id = $to_id;
+        $this->to = $to;
+
+        return $this;
+    }
+
+    public function getDay(): ?\DateTimeInterface
+    {
+        return $this->day;
+    }
+
+    public function setDay(\DateTimeInterface $day): self
+    {
+        $this->day = $day;
 
         return $this;
     }
