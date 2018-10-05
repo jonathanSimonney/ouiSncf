@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Horaire;
 use App\Entity\Place;
 use App\Form\SearchFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,14 +22,13 @@ class SearchPlaceController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-//            var_dump($form->getData()["departure"]);
-//            var_dump($form->getData()["destination"]);
-            var_dump($form->getData()["from_time"]);
-            die;
+            $fromPlace = $form->getData()["departure"];
+            $toPlace = $form->getData()["destination"];
+            $beginningAtTime = $form->getData()["from_time"];
 
             $results = $this->getDoctrine()
-                ->getRepository(Place::class)
-                ->findFromToBeginningAt($from_id, $to_id, $beginning_at_time);
+                ->getRepository(Horaire::class)
+                ->findFromToBeginningAt($fromPlace, $toPlace, $beginningAtTime);
 
             var_dump($results);
             die;

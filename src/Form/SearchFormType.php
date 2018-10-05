@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Destination;
+use App\Repository\DestinationRepository;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -17,13 +18,21 @@ class SearchFormType extends AbstractType
         $builder
             ->add('departure', EntityType::class, array(
                 'class' => Destination::class,
-                'choice_label' => 'name'
+                'choice_label' => 'name',
+                'query_builder' => function (DestinationRepository $dr) {
+                    return $dr->createQueryBuilder('d')
+                        ->orderBy('d.name', 'ASC');
+                },
             ))
             ->add('destination', EntityType::class, array(
                 'class' => Destination::class,
-                'choice_label' => 'name'
+                'choice_label' => 'name',
+                'query_builder' => function (DestinationRepository $dr) {
+                    return $dr->createQueryBuilder('d')
+                        ->orderBy('d.name', 'ASC');
+                },
             ))
-            ->add('from_time', DateTimeType::class, array('data' => new \DateTime()))//add time to be current time
+            ->add('from_time', DateTimeType::class, array('data' => (new \DateTime())->modify(' +2 hours')))//add time to be current time
             ->add('search', SubmitType::class)
         ;
     }
