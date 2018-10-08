@@ -27,16 +27,18 @@ class HoraireRepository extends ServiceEntityRepository
      * @param $departureDateTime
      */
     public function findFromToBeginningAt(Destination $originalFromPlace, Destination $originalToPlace, $departureDateTime){
-        //if the places were there, they would be checked in the 2 queries to take only horaire where there isat least one place left
-        $departureDay =$departureDateTime->format('Y-m-d');
+        //if the places were there, they would be checked in the 2 queries to take only horaire where there is at least one place left
+        $departureDay = $departureDateTime->format('Y-m-d');
+        $nextDay = $departureDateTime->modify('+ 1 day');
         $departureTime =$departureDateTime->format('H:i:s');
 
         //we select the trains (departing after time given by user) AND (going from departure destination OR coming to arrival destination)
         $firstPass = $this->createQueryBuilder('h')
-            ->where('(h.day = :depart_day AND h.depart_at >= :depart_time) OR h.day > :depart_day') //departing after time given by user
+            ->where('(h.day = :depart_day AND h.depart_at >= :depart_time) OR h.day = :next_depart_day') //departing after time given by user
             ->andWhere('h.from = :from_place OR h.to = :to_place') //going from departure destination OR coming to arrivale destination
             ->setParameter('depart_time', $departureTime)
             ->setParameter('depart_day', $departureDay)
+            ->setParameter('next_depart_day', $nextDay)
             ->setParameter('from_place', $originalFromPlace)
             ->setParameter('to_place', $originalToPlace)
             ->orderBy('h.depart_at', 'ASC')
@@ -74,10 +76,11 @@ class HoraireRepository extends ServiceEntityRepository
 
         //we select the trains (departing after time given by user) AND (going from one of the interesting departure destination AND coming to one of the interesting arrival destination)
         $intermediateHoraireArray = $this->createQueryBuilder('h')
-            ->where('(h.day = :depart_day AND h.depart_at >= :depart_time) OR h.day > :depart_day')
+            ->where('(h.day = :depart_day AND h.depart_at >= :depart_time) OR h.day = :next_depart_day') //departing after time given by user
             ->andWhere('h.from IN (:from_place_array) AND h.to IN (:to_place_array)')
             ->setParameter('depart_time', $departureTime)
             ->setParameter('depart_day', $departureDay)
+            ->setParameter('next_depart_day', $nextDay)
             ->setParameter('from_place_array', $departPlaceArray)
             ->setParameter('to_place_array', $arrivalPlaceArray)
             ->orderBy('h.depart_at', 'ASC')
@@ -115,13 +118,10 @@ class HoraireRepository extends ServiceEntityRepository
                     }elseif (array_key_exists($trajectCorrDestName, $structArrivalHoraire)){
                         $finalHoraireArray = $structArrivalHoraire[$trajectCorrDestName];
                         $trajetArray[] = [$departHoraireArray, $corrTrajectHoraireArray, $finalHoraireArray];
-                    }  //chercher la dernière correspondance dans $arrivalHoraireArray, vérifier la chainabilité, et l'ajouter à trajectArray.
+                    }
                 }
             }
         }
-
-        var_dump(count($trajetArray));
-        die;
 
         $horaireStruct = [];
         foreach ($trajetArray as $trajet){
@@ -133,11 +133,43 @@ class HoraireRepository extends ServiceEntityRepository
     }
 
     protected function generateHoraireArray($traject){//a traject is an array of array of horaire all having same from and to
-        //todo
+        $ret = [];
+        $firstPass = true;
+        foreach ($traject as /**@var Horaire[] $arrayHoraire */ $arrayHoraire){
+            if ($firstPass){//the first time, we fill our ret with the first part of the horaire
+                $firstPass = false;
+                foreach ($arrayHoraire as $horaire) {
+                    $ret[] = [$horaire];
+                }
+            }else{//the other time, we add the correspondance horaire to all the arrays currently in $ret
+                $ret = $this->expandHoraireArrayWithNextCorr($ret, $arrayHoraire);
+            }
+        }
+        return $ret;
+    }
+
+    protected function expandHoraireArrayWithNextCorr($structHoraire, $arrayCorr){
+        $ret = [];
+        foreach ($structHoraire as $arrayHoraire){
+            foreach ($arrayCorr as $additionalHoraire) {
+                if ($this->checkChainability($arrayHoraire, $additionalHoraire)){
+                    $ret[] = array_merge($arrayHoraire, [$additionalHoraire]);
+                }
+            }
+        }
+        return $ret;
     }
 
     protected function isDestinationTheOne($destinationName, $finalDestinationName){
         return $destinationName === $finalDestinationName;
+    }
+
+    protected function checkChainability(/** @var Horaire[] $arrayHoraire */ $arrayHoraire, Horaire $horaire){
+        $lastHoraire = end($arrayHoraire);
+        if ($lastHoraire->getDay() < $horaire->getDay()){//a bit too large maybe? (correspondance with 3 days of difference...)
+            return true;
+        }
+        return $lastHoraire->getArriveAt() < $horaire->getDepartAt();
     }
 
 

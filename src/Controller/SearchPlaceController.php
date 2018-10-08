@@ -30,7 +30,7 @@ class SearchPlaceController extends AbstractController
                 ->getRepository(Horaire::class)
                 ->findFromToBeginningAt($fromPlace, $toPlace, $beginningAtTime);
 
-            var_dump($results);
+            var_dump(count($results));
             die;
             return $this->render('search_place/result.html.twig', [
                 'controller_name' => 'SearchPlaceController',
