@@ -30,35 +30,14 @@ class SearchPlaceController extends AbstractController
                 ->getRepository(Horaire::class)
                 ->findFromToBeginningAt($fromPlace, $toPlace, $beginningAtTime);
 
-            var_dump(count($results));
-            die;
             return $this->render('search_place/result.html.twig', [
                 'controller_name' => 'SearchPlaceController',
-                'result' => $results,
+                'results' => $results,
             ]);
         }
         return $this->render('search_place/index.html.twig', [
             'controller_name' => 'SearchPlaceController',
             'form' => $form->createView(),
-        ]);
-    }
-
-    /**
-     * @Route("/search/place", name="result_place")
-     *
-     */
-    public function getSearchResult(Request $request)
-    {
-        $form = $this->createForm(SearchFormType::class);
-
-
-        $results = $this->getDoctrine()
-            ->getRepository(Place::class)
-            ->findFromToBeginningAt($from_id, $to_id, $beginning_at_time);
-
-        return $this->render('search_place/result.html.twig', [
-            'controller_name' => 'SearchPlaceController',
-            'result' => $results,
         ]);
     }
 }
